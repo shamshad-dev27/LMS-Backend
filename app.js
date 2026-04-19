@@ -8,12 +8,11 @@ import courseRoutes from './routes/course.routes.js'
 import paymentRoutes from './routes/payment.routes.js'
 import contactRoutes from './routes/contact.routes.js'
 import chartRoutes from './routes/chart.routes.js'
-import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 app.use(cors({
-    origin: [process.env.FRONTEND_URL],
+    origin: [process.env.FRONTEND_URL] || 'https://lms-backend-29dk.onrender.com',
     credentials: true
 }))
 app.use(express.json({ limit: '500mb' }));
