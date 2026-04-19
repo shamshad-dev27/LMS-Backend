@@ -12,7 +12,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 app.use(cors({
-    origin: [process.env.FRONTEND_URL] || 'ms-frontend-k1sa7qw1k-shamshad-dev27s-projects.vercel.app',
+    origin: process.env.FRONTEND_URL || 'https://ms-frontend-k1sa7qw1k-shamshad-dev27s-projects.vercel.app',
     credentials: true
 }))
 app.use(express.json({ limit: '500mb' }));
