@@ -1,6 +1,9 @@
 import Groq from 'groq-sdk';
 import { Router } from 'express';
 import { isLoggedIn } from '../middleware/auth.middleware.js';
+import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const router = Router();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
