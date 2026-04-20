@@ -34,6 +34,7 @@ const getLectureByCoureseId = async (req, res, next) => {
 }
 
 
+
 const createCourse = async (req, res, next) => {
    try {
       const { title, description, category, createdBy } = req.body;
@@ -57,8 +58,10 @@ const createCourse = async (req, res, next) => {
          return next(new appError('Course could not be created, please try again', 500));
       }
 
+      // Check if file exists
       if (req.file) {
          try {
+            console.log("✅ Local file path:", req.file.path);
 
             const result = await cloudinary.v2.uploader.upload(req.file.path, {
                folder: 'LMS',
@@ -69,19 +72,21 @@ const createCourse = async (req, res, next) => {
             });
 
             if (result) {
-
+               // ✅ Database updates
                course.thumbnail.public_id = result.public_id;
                course.thumbnail.secure_url = result.secure_url;
 
-
                await course.save();
 
-
+               // ✅ File remove after successful upload and save
                await fs.rm(req.file.path);
+               console.log("✅ Cloudinary upload success and local file deleted");
             }
          } catch (error) {
-
-
+            // ❌ Agar upload fail ho jaye toh local file delete karna zaroori hai
+            if (req.file) {
+               await fs.rm(req.file.path);
+            }
             return next(new appError(error.message || 'File upload failed', 500));
          }
       }
