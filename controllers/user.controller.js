@@ -13,8 +13,6 @@ const cookiesOption = {
   secure: true,
   sameSite: 'none',
 };
-
-res.cookie('token', token, cookieOptions);
 const register = async (req, res, next) => {
   const { fullName, email, password, } = req.body;
   if (!fullName || !email || !password) {
@@ -52,7 +50,7 @@ const register = async (req, res, next) => {
         user.avatar.public_id = result.public_id;
         user.avatar.secure_url = result.secure_url;
         // Remove file from server
-        fs.rm(`uploads/${req.file.filename}`)
+        await fs.rm(`uploads/${req.file.filename}`)
       }
     } catch (e) {
       return next(new appError(e || 'file not upload , please try again'), 500);
@@ -100,8 +98,9 @@ const login = async (req, res, next) => {
 const logout = (req, res) => {
   res.cookie('token', null, {
     secure: true,
+    sameSite: 'none',
+    httpOnly: true,
     maxAge: 0,
-    httpOnly: true
   })
   res.status(200).json({
     success: true,
@@ -241,10 +240,10 @@ const updateUser = async (req, res, next) => {
         user.avatar.public_id = result.public_id;
         user.avatar.secure_url = result.secure_url;
         // Remove file from server
-        fs.rm(`uploads/${req.file.filename}`)
+        await fs.rm(`uploads/${req.file.filename}`)
       }
     } catch (e) {
-      return next(e || 'file not upload , please try again', 500);
+      return next(new appError(e.message || 'file not upload', 500));
     }
   }
   await user.save();
@@ -275,7 +274,7 @@ const Alluser = async (req, res, next) => {
     });
 
   } catch (error) {
-    return next(new AppError(error.message || 'Failed to fetch user data', 500));
+    return next(new appError(error.message || 'Failed to fetch user data', 500));
   }
 };
 export {
