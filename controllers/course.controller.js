@@ -1,10 +1,11 @@
-import Coures from "../models/course.modle.js"
+
 import appError from "../utils/error.utils.js";
 import fs from 'fs/promises';
 import cloudinary from 'cloudinary'
+import Course from "../models/course.modle.js";
 const getAllCourse = async (req, res, next) => {
    try {
-      const courses = await Coures.find({}).select('-lectures');
+      const courses = await Course.find({}).select('-lectures');
 
       res.status(200).json({
          success: true,
@@ -19,7 +20,7 @@ const getAllCourse = async (req, res, next) => {
 const getLectureByCoureseId = async (req, res, next) => {
    try {
       const { id } = req.params;
-      const course = await Coures.findById(id);
+      const course = await Course.findById(id);
 
       if (!course) {
          return next(new appError('Invalid course id'), 400);
@@ -39,7 +40,7 @@ const createCourse = async (req, res, next) => {
    if (!title || !description || !category || !createdBy) {
       return next(new appError('All field is required', 500));
    }
-   const course = await Coures.create({
+   const course = await Course.create({
       title,
       description,
       category,
@@ -84,7 +85,7 @@ const createCourse = async (req, res, next) => {
 const updateCourse = async (req, res, next) => {
    try {
       const { id } = req.params;
-      const course = await Coures.findByIdAndUpdate(
+      const course = await Course.findByIdAndUpdate(
          id,
          {
             $set: req.body
@@ -109,12 +110,12 @@ const updateCourse = async (req, res, next) => {
 const removeCourese = async (req, res, next) => {
    try {
       const { id } = req.params;
-      const coures = await Coures.findById(id);
+      const coures = await Course.findById(id);
       if (!coures) {
          return (new appError('Coures with give id do not exist', 500));
       }
 
-      await Coures.findByIdAndDelete(id);
+      await Course.findByIdAndDelete(id);
 
       res.status(200).json({
          success: true,
@@ -130,7 +131,7 @@ const AddLectureToCourseById = async (req, res, next) => {
    if (!title || !description) {
       return next(new appError('All field is required', 400));
    }
-   const course = await Coures.findById(id);
+   const course = await Course.findById(id);
    if (!course) {
       return next(new appError('Coures with give id do not exist', 500));
    }
@@ -171,7 +172,7 @@ const AddLectureToCourseById = async (req, res, next) => {
 }
 const removeLecture = async (req, res, next) => {
    const { courseId, lectureId } = req.params;
-   const course = await Coures.findById(courseId);
+   const course = await Course.findById(courseId);
    if (!course) {
       return next(new appError('Coures with give id do not exist', 500));
    }

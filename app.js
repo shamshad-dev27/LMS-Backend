@@ -19,14 +19,6 @@ app.use(cors({
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
 
-// app.use(bodyParser.json({ limit: '500mb' }));
-
-// app.use(bodyParser.urlencoded({
-//     limit: '500mb',
-//     extended: true,
-//     parameterLimit: 50000
-// }));
-
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use('/ping', function (req, res) {
