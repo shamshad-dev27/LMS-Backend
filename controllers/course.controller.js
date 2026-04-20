@@ -33,50 +33,69 @@ const getLectureByCoureseId = async (req, res, next) => {
    }
 }
 
+
 const createCourse = async (req, res, next) => {
    try {
       const { title, description, category, createdBy } = req.body;
+
       if (!title || !description || !category || !createdBy) {
          return next(new appError('All fields are required', 400));
       }
+
       const course = await Course.create({
-         title, description, category, createdBy,
+         title,
+         description,
+         category,
+         createdBy,
          thumbnail: {
             public_id: 'default',
-            secure_url: "https://res.cloudinary.com/demo/image/upload/v12345/user.png",
-         }
+            secure_url: 'https://res.cloudinary.com/demo/image/upload/v12345/user.png',
+         },
       });
+
       if (!course) {
          return next(new appError('Course could not be created, please try again', 500));
       }
+
       if (req.file) {
          try {
+
             const result = await cloudinary.v2.uploader.upload(req.file.path, {
                folder: 'LMS',
-               width: 1280, height: 720,
-               gravity: 'auto', crop: 'fill'
+               width: 1280,
+               height: 720,
+               gravity: 'auto',
+               crop: 'fill',
             });
+
             if (result) {
+
                course.thumbnail.public_id = result.public_id;
                course.thumbnail.secure_url = result.secure_url;
-               await fs.rm(`uploads/${req.file.filename}`);
+
+
                await course.save();
+
+
+               await fs.rm(req.file.path);
             }
-         } catch (e) {
-            return next(new appError(e.message, 500));
+         } catch (error) {
+
+
+            return next(new appError(error.message || 'File upload failed', 500));
          }
       }
-      // ✅ Response if block ke BAHAR
+
       res.status(201).json({
          success: true,
          message: 'Course created successfully',
          course
       });
+
    } catch (e) {
       return next(new appError(e.message, 500));
    }
 }
-
 const updateCourse = async (req, res, next) => {
    try {
       const { id } = req.params;
