@@ -6,11 +6,15 @@ import fs from 'fs/promises'
 import sendEmail from "../utils/sendEmail.js";
 import crypto from 'crypto'
 import bcrypt from "bcryptjs";
+
 const cookiesOption = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
-  httpOnly: false,
-  secure: true
-}
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none',
+};
+
+res.cookie('token', token, cookieOptions);
 const register = async (req, res, next) => {
   const { fullName, email, password, } = req.body;
   if (!fullName || !email || !password) {
