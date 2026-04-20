@@ -29,7 +29,7 @@ const getLectureByCoureseId = async (req, res, next) => {
          success: true,
          message: 'Course lecture fatch successfully',
          course,
-         lecture: course.lectures,
+         lectures: course.lectures,
       })
    } catch (e) {
       return next(new appError(e.message), 500);
