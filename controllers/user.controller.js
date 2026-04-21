@@ -16,48 +16,66 @@ const cookiesOption = {
 const register = async (req, res, next) => {
   try {
     const { fullName, email, password } = req.body;
-    if (!fullName || !email || !password) {
+
+    if (!fullName?.trim() || !email?.trim() || !password?.trim()) {
       return next(new appError('All fields are required', 400));
     }
-    const userExist = await User.findOne({ email });
+
+    const userExist = await User.findOne({ email: email.toLowerCase().trim() });
     if (userExist) {
       return next(new appError('User already exists', 409));
     }
+
     const user = await User.create({
-      fullName, email, password,
+      fullName: fullName.trim(),
+      email: email.toLowerCase().trim(),
+      password,
       avatar: {
         public_id: email,
         secure_url: "https://res.cloudinary.com/demo/image/upload/v12345/user.png"
       }
     });
+
     if (!user) {
       return next(new appError('User registration failed, please try again', 500));
     }
+
     if (req.file) {
       try {
         const result = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: 'LMS', width: 250, height: 250,
-          gravity: 'faces', crop: 'fill'
+          folder: 'LMS',
+          width: 250,
+          height: 250,
+          gravity: 'faces',
+          crop: 'fill'
         });
+
         if (result) {
           user.avatar.public_id = result.public_id;
           user.avatar.secure_url = result.secure_url;
-          await fs.rm(`uploads/${req.file.filename}`);
+          await fs.rm(req.file.path);
         }
       } catch (e) {
-        return next(new appError(e.message || 'File not uploaded, please try again', 500));
+        console.error('Avatar upload failed:', e.message);
       }
     }
+
     await user.save();
+
     const token = await user.generateJWTtoken();
     res.cookie('token', token, cookiesOption);
     user.password = undefined;
+
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       user,
     });
+
   } catch (e) {
+    if (req.file) {
+      await fs.rm(req.file.path).catch(() => { });
+    }
     return next(new appError(e.message, 500));
   }
 };
